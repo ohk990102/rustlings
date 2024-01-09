@@ -1,7 +1,9 @@
 use crate::exercise::{CompiledExercise, Exercise, Mode, State};
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
+use std::path::PathBuf;
 use std::{env, time::Duration};
+use std::process::Command;
 
 // Verify that the provided container of Exercise objects
 // can be compiled and run without any failures.
@@ -33,6 +35,7 @@ pub fn verify<'a>(
             Mode::Clippy => compile_only(exercise, success_hints),
         };
         if !compile_result.unwrap_or(false) {
+            open_code_on_editor(exercise.path.to_owned());
             return Err(exercise);
         }
         percentage += 100.0 / total as f32;
@@ -227,6 +230,12 @@ fn prompt_for_completion(
     }
 
     false
+}
+
+fn open_code_on_editor(path: PathBuf) {
+    let _ = Command::new("code")
+    .arg(path.into_os_string().into_string().unwrap())
+    .spawn();
 }
 
 fn separator() -> console::StyledObject<&'static str> {
